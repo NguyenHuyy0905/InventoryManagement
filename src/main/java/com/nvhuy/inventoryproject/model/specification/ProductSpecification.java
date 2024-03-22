@@ -29,8 +29,24 @@ public class ProductSpecification {
             if (criteria.getWarranty() != null) {
                 predicates.add(criteriaBuilder.like(criteriaBuilder.lower(root.get("warranty")), "%" + criteria.getWarranty().toLowerCase() + "%"));
             }
-            if (criteria.getCategoryName() != null) {
-                predicates.add(criteriaBuilder.equal(criteriaBuilder.lower(root.get("category").get("name")), criteria.getCategoryName().toLowerCase()));
+            // Đảm bảo rằng categoryName không phải là null và không phải là một danh sách rỗng
+            if (criteria.getCategoryName() != null && !criteria.getCategoryName().isEmpty()) {
+                // Tạo một mảng để lưu trữ các điều kiện cho mỗi categoryName trong danh sách
+                List<Predicate> categoryNamePredicates = new ArrayList<>();
+
+                // Lặp qua từng categoryName trong danh sách
+                for (String categoryName : criteria.getCategoryName()) {
+                    // Tạo một điều kiện cho mỗi categoryName
+                    Predicate categoryNamePredicate = criteriaBuilder.equal(criteriaBuilder.lower(root.get("category").get("name")), categoryName.toLowerCase());
+                    // Thêm điều kiện vào danh sách
+                    categoryNamePredicates.add(categoryNamePredicate);
+                }
+
+                // Tạo một điều kiện tổng hợp bằng cách kết hợp tất cả các điều kiện cho từng categoryName bằng OR
+                Predicate categoryNameCombinedPredicate = criteriaBuilder.or(categoryNamePredicates.toArray(new Predicate[0]));
+
+                // Thêm điều kiện tổng hợp vào danh sách điều kiện chính
+                predicates.add(categoryNameCombinedPredicate);
             }
             if (criteria.getBrandName() != null) {
                 predicates.add(criteriaBuilder.equal(criteriaBuilder.lower(root.get("brand").get("name")), criteria.getBrandName().toLowerCase()));
@@ -71,6 +87,23 @@ public class ProductSpecification {
             if (Objects.nonNull(criteria.getMaxQuantity())) {
                 Expression<Integer> quantity = root.get("quantity");
                 predicates.add(criteriaBuilder.lessThanOrEqualTo(quantity, criteria.getMaxQuantity()));
+            }
+
+            // Create & Update
+            if (criteria.getCreatedBy() != null) {
+                predicates.add(criteriaBuilder.equal(root.get("createdBy"), criteria.getCreatedBy()));
+            }
+
+            if (criteria.getCreatedDate() != null) {
+                predicates.add(criteriaBuilder.equal(root.get("createdDate"), criteria.getCreatedDate()));
+            }
+
+            if (criteria.getUpdateBy() != null) {
+                predicates.add(criteriaBuilder.equal(root.get("updateBy"), criteria.getUpdateBy()));
+            }
+
+            if (criteria.getUpdateDate() != null) {
+                predicates.add(criteriaBuilder.equal(root.get("updateDate"), criteria.getUpdateDate()));
             }
 
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));

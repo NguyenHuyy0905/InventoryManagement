@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.sql.Date;
 import java.util.List;
 
 @Entity
@@ -53,4 +54,17 @@ public class Product {
 
     @OneToMany(mappedBy = "product")
     private List<Feedback> feedbacks;
+
+    @Column(name = "created_by")
+    private String createdBy;
+
+    @Column(name = "created_date")
+    private Date createdDate;
+
+    @Column(name = "update_by")
+    private String updateBy;
+
+    @Column(name = "update_date")
+    private Date updateDate;
+
 }
